@@ -1,4 +1,3 @@
-
 name = "noaa-proxy"
 main = "src/index.ts"
 compatibility_date = "2026-08-10"
@@ -13,3 +12,4 @@ routes = [
 directory = "./public"
 binding = "ASSETS"
 not_found_handling = "404-page"
+
