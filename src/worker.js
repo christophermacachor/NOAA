@@ -1,45 +1,45 @@
-
-export interface Env {
-  ASSETS: Fetcher;
-}
-
+// src/worker.js
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const pathname = url.pathname;
-
-    // ── NOAA API Proxy ──────────────────────────────────────────
-    if (pathname.startsWith('/api/noaa/')) {
-      const noaaPath = pathname.replace('/api/noaa/', '');
-      const noaaUrl = `https://services.swpc.noaa.gov/${noaaPath}${url.search}`;
-
-      const noaaRequest = new Request(noaaUrl, {
-        method: request.method,
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'noaa-proxy/1.0 (macachor.org)'
-        }
-      });
-
-      const response = await fetch(noaaRequest);
-
-      const corsHeaders = new Headers(response.headers);
-      corsHeaders.set('Access-Control-Allow-Origin', '*');
-      corsHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-      corsHeaders.set('Access-Control-Max-Age', '86400');
-
-      if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers: corsHeaders });
+    
+    // Serve the HTML file for the root path
+    if (url.pathname === '/' || url.pathname === '') {
+      try {
+        // If you're using Cloudflare Pages, this will be handled automatically
+        // For Workers, we need to serve the HTML directly
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOAA</title>
+</head>
+<body>
+    <h1>NOAA Weather Service</h1>
+    <!-- Your HTML content from public/index.html -->
+</body>
+</html>`;
+        
+        return new Response(html, {
+          headers: {
+            'Content-Type': 'text/html',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+      } catch (error) {
+        return new Response('Error loading page', { status: 500 });
       }
-
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: corsHeaders
+    }
+    
+    // Handle API requests or other routes
+    if (url.pathname === '/api/weather') {
+      // Your NOAA API logic here
+      return new Response(JSON.stringify({ message: 'Weather data' }), {
+        headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    // ── Static Assets ───────────────────────────────────────────
-    return env.ASSETS.fetch(request);
+    
+    return new Response('Not Found', { status: 404 });
   }
 };
