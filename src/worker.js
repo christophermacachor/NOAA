@@ -21,10 +21,10 @@ export default {
       "/alerts": "https://api.weather.gov/alerts"
     };
 
-    const defaultPaths = {
-      "/alerts": "/active",
-      "/space-weather": "/products/noaa-planetary-k-index.json"
-    };
+  const defaultPaths = {
+  "/alerts": "/active",
+  "/space-weather": "/products/noaa-planetary-k-index.json"
+};
 
     const route = Object.keys(noaaEndpoints).find(r => path === r || path.startsWith(r + "/"));
 
